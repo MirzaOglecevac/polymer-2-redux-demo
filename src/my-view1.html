@@ -1,0 +1,129 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="redux-mixin.html">
+
+<dom-module id="my-view1">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+    </style>
+
+    <div class="card">
+
+      Add new Value: <input id="value" type="text" /> <button on-click="changeItems"> Add</button>
+
+      <p> Items: [[items]]</p>
+      <p> Number of items: [[numberOfItems]]</p>
+      <br/>
+      <h2> AJAX Data </h2>
+
+      <button on-click="showApi">API Data</button>
+
+      <iron-ajax
+                  auto
+                  url="https://api.github.com/users/burczu/repos"
+                  handle-as="json"
+                  last-response="{{ajaxResponse}}">
+      </iron-ajax>
+
+           <template is="dom-repeat" items={{api.0}} as="item">
+
+                <p id="{{index}}"> {{item.name}} </p>
+
+            </template>
+			
+			<button on-click="showDataAgain">Show</button>
+			
+			<template is="dom-if" if="{{condition}}">
+			 <template is="dom-repeat" items = [[api.0]] as="apis">
+			  <li> [[apis.name]]</li>
+			 </template>
+		</template>
+
+    </div>
+
+
+
+  </template>
+
+  <script>
+    class MyView1 extends ReduxMixin(Polymer.Element) {
+      static get is() { return 'my-view1'; }
+
+      static get properties() {
+        return {
+          items: {
+            type: Array,
+            statePath: 'items'
+          },
+          api: {
+            type: Array,
+            statePath: 'api'
+          },
+          numberOfItems: {
+            type: Number,
+            computed: 'itemsLength(items)'
+          },
+		  condition: {
+            type: Boolean,
+            value: false
+       }
+        };
+      }
+
+      showApi(){
+		this.dispatch({
+          type: 'GET_API',
+          item: this.ajaxResponse
+        });
+        console.log("API data inside View1: " + this.api);
+      }
+	  
+	  showDataAgain(){
+		this.condition = true;
+	  }
+
+      connectedCallback() {
+        super.connectedCallback();
+
+        // Let's update the message
+        /* this.dispatch({
+          type: 'UPDATE_MESSAGE',
+          message: 'This is MAGIC!',
+        }); */
+      }
+
+      json(obj) {
+        return JSON.stringify(obj, null, 2);
+      }
+
+      itemsLength(items){
+        return items.length;
+      }
+
+      changeItems(){
+        this.dispatch({
+          type: 'UPDATE_ITEMS',
+          item: this.$.value.value
+        });
+      }
+    }
+
+    window.customElements.define(MyView1.is, MyView1);
+  </script>
+</dom-module>

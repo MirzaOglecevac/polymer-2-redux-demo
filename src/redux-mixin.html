@@ -1,0 +1,58 @@
+<link rel="import" href="../../bower_components/polymer-redux/polymer-redux.html">
+<script src="../../node_modules/redux/dist/redux.js"></script>
+<script>
+  // Setup a Redux store
+  const initial = {
+    items: [],
+	 api: []
+  };
+  /*const apiData = {
+    api: [2,5]
+  };*/
+ // console.log("API: " + apiData);
+  //const reducer = state => state;
+  const reducer = (state, action) => {
+
+    if(!state) return initial;
+
+    switch (action.type) {
+    case 'UPDATE_ITEMS':{
+      // ALWAYS return new state
+      const items = state.items.slice(0);
+      items.push(action.item);
+      return Object.assign({}, state, {items: items });
+    }
+
+    case 'DELETE_ITEMS': {
+        console.log("Index to remove: " + action.item);
+        const items = state.items.slice(0);
+        items.splice(action.item, 1);
+        console.log("Novi niz: " + items);
+        return Object.assign({}, state, {items: items });
+    }
+	
+	 case 'GET_API': {
+       
+        const api = state.api.slice(0);
+		api.push(action.item);
+        return Object.assign({}, state, {api: api });
+    }
+	
+	 case 'UPDATE_API': {
+       
+        const api = state.api.slice(0);
+		//api.push(action.item);
+		console.log("Array: " + api);
+		api[0][2].name = action.item;
+        return Object.assign({}, state, {api: api });
+    }
+
+    default:
+    return state;
+  }
+};
+  const store = Redux.createStore(reducer, initial);
+
+  ReduxMixin = PolymerRedux(store);
+  
+</script>
